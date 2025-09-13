@@ -12,6 +12,8 @@
   "description": "",
   "dependencies": {
     "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
     "node-telegram-bot-api": "^0.66.0",
     "play-sound": "^1.1.6",
     "twilio": "^5.9.0"
