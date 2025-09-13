@@ -1,4 +1,7 @@
+const fs = require('fs');
 require('dotenv').config();
+// Handle /mms command to send saxyBoi.jpg image with detailed logging
+
 const twilio = require('twilio');
 const TelegramBot = require('node-telegram-bot-api');
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -23,7 +26,26 @@ app.listen(PORT, () => {
 });
 
 console.log('Rescue Call Bot is running and listening for commands...');
-
+bot.onText(/\/mms/, (msg) => {
+    const chatId = msg.chat.id;
+    const imagePath = require('path').join(__dirname, 'saxyBoi.jpg');
+    console.log(`[MMS] /mms command received from chat ID: ${chatId}`);
+    fs.access(imagePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            console.error(`[MMS] saxyBoi.jpg not found at ${imagePath}`);
+            bot.sendMessage(chatId, '❌ Image file saxyBoi.jpg not found on server.');
+            return;
+        }
+        bot.sendPhoto(chatId, imagePath, { caption: 'Here is your image!' })
+            .then(() => {
+                console.log(`[MMS] saxyBoi.jpg sent to chat ID: ${chatId}`);
+            })
+            .catch((err) => {
+                console.error('[MMS] Error sending image:', err);
+                bot.sendMessage(chatId, '❌ Failed to send the image.');
+            });
+    });
+});
 bot.onText(/\/rescue/, async (msg) => {
     const chatId = msg.chat.id;
     console.log(`Received /rescue command from chat ID: ${chatId}`);
