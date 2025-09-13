@@ -29,29 +29,17 @@ bot.onText(/\/rescue/, async (msg) => {
     console.log(`Received /rescue command from chat ID: ${chatId}`);
     bot.sendMessage(chatId, '🤖 Rescue call initiated. Your phone should ring shortly...');
     try {
-        // Use a TwiML URL that plays the recording
-        const publicUrl = process.env.PUBLIC_URL || `http://your-server-ip:${PORT}`; // Set PUBLIC_URL in .env for production
-        const twimlUrl = `${publicUrl}/twiml`;
+        // Use Twilio's <Say> verb directly for a static urgent message
+        const twiml = new twilio.twiml.VoiceResponse();
+        twiml.say({ voice: 'alice', language: 'en-IN' }, "It's urgent here, we need you man!");
         const call = await twilioClient.calls.create({
-            url: twimlUrl,
+            twiml: twiml.toString(),
             to: myPhoneNumber,
             from: twilioPhoneNumber
         });
         console.log(`Call initiated successfully with SID: ${call.sid}`);
         bot.sendMessage(chatId, `✅ Call is on the way! (SID: ${call.sid})`);
-// TwiML endpoint for Twilio to fetch instructions to play the recording from Cloudinary
-app.post('/twiml', (req, res) => {
-    const audioUrl = process.env.CLOUDINARY_AUDIO_URL;
-    if (!audioUrl) {
-        res.status(500).send('CLOUDINARY_AUDIO_URL not set in environment');
-        return;
-    }
-    res.type('text/xml');
-    res.send(`<?xml version="1.0" encoding="UTF-8"?>
-        <Response>
-            <Play>${audioUrl}</Play>
-        </Response>`);
-});
+
     } catch (error) {
         console.error('Error making call:', error);
         bot.sendMessage(chatId, `❌ Oops! Something went wrong and I couldn't make the call. Please check the server logs.`);
